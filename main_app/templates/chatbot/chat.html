@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot - Ask AyushBot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+    }
+
+    .chat-container {
+      background: white;
+      width: 400px;
+      max-width: 95vw;
+      height: 600px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #764ba2;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    #chatLog {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 12px 18px;
+      border-radius: 25px;
+      line-height: 1.4;
+      font-size: 1rem;
+      position: relative;
+      word-wrap: break-word;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #667eea;
+      color: white;
+      border-bottom-right-radius: 5px;
+    }
+
+    .message.bot {
+      align-self: flex-start;
+      background: #e0d4f9;
+      color: #4a2c9a;
+      border-bottom-left-radius: 5px;
+    }
+
+    .message strong {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .chat-input-area {
+      display: flex;
+      padding: 15px 20px;
+      background: white;
+      border-top: 1px solid #ddd;
+    }
+
+    #userInput {
+      flex-grow: 1;
+      border: 2px solid #764ba2;
+      border-radius: 30px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    #userInput:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 8px #667eea;
+    }
+
+    #sendBtn {
+      background: #764ba2;
+      border: none;
+      color: white;
+      padding: 0 25px;
+      margin-left: 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    #sendBtn:hover {
+      background: #5a358e;
+    }
+
+    /* Scrollbar for chatLog */
+    #chatLog::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chatLog::-webkit-scrollbar-thumb {
+      background-color: #764ba2;
+      border-radius: 4px;
+    }
+
+    #chatLog::-webkit-scrollbar-track {
+      background: #f7f7f7;
+    }
+
+    /* Fade in animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat-container" role="main" aria-label="Chatbot interface">
+    <header class="chat-header">Ask Bot 🤖</header>
+
+    <div id="chatLog" aria-live="polite" aria-relevant="additions"></div>
+
+    <form id="chatForm" class="chat-input-area" onsubmit="event.preventDefault(); sendMessage();">
+      <input type="text" id="userInput" autocomplete="off" placeholder="Type your question here..." aria-label="Message input" />
+      <button type="submit" id="sendBtn" aria-label="Send message button">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chatLog = document.getElementById('chatLog');
+    const userInput = document.getElementById('userInput');
+
+    function appendMessage(sender, text) {
+      const p = document.createElement('p');
+      p.classList.add('message');
+      p.classList.add(sender === 'You' ? 'user' : 'bot');
+      p.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      chatLog.appendChild(p);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      appendMessage('You', message);
+      userInput.value = '';
+
+      try {
+        const response = await fetch('/chatbot/chat/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({ message })
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        appendMessage('Bot', data.response);
+      } catch (error) {
+        appendMessage('Bot', 'Sorry, there was an error. Please try again later.');
+      }
+    }
+
+    // CSRF helper for Django
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // Focus input on page load
+    window.onload = () => {
+      userInput.focus();
+    };
+  </script>
+</body>
+
+</html>
