@@ -1,7 +1,91 @@
+<!-- FOOTER -->
 <footer class="main-footer">
-    <strong>Copyright &copy; 2014-{% now "Y" %} <a href="#">Ayush Giri</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-        <b>Version</b> 1.0.0
-    </div>
+  <strong>Copyright &copy; {% now "Y" %} <a href="#">Ayush Giri</a>.</strong>
+  All rights reserved.
+  <div class="float-right d-none d-sm-inline-block">
+      <b>Version</b> 1.0.0
+  </div>
 </footer>
+
+<!-- CHATBOT STYLES -->
+<style>
+  /* Floating chat icon */
+  #chatIcon {
+    position: fixed;
+    bottom: 100px;
+    right: 40px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 999999;
+  }
+
+  /* Chat Modal */
+  #chatModal {
+    display: none;
+    position: fixed;
+    bottom: 170px;
+    right: 40px;
+    width: 400px;
+    height: 600px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    z-index: 999998;
+  }
+
+  /* Close Button */
+  #closeBtn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000;
+  }
+
+  /* Chatbot iframe */
+  #chatModal iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* Optional: Prevent parent from clipping */
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+</style>
+
+<!-- CHAT ICON & MODAL -->
+<button id="chatIcon" title="Chat with us">💬</button>
+
+<div id="chatModal">
+  <button id="closeBtn" title="Close chat">&times;</button>
+  <iframe src="https://widget.botsonic.com/CDN/index.html?service-base-url=https%3A%2F%2Fapi-azure.botsonic.ai&token=552218f4-e124-4038-ab04-2c956d1febb1&base-origin=https%3A%2F%2Fbot.writesonic.com&instance-name=Botsonic&standalone=true&page-url=https%3A%2F%2Fbot.writesonic.com%2Fbots%2F9444bacc-9771-431d-9619-72d33c428388%2Fconnect"></iframe>
+</div>
+
+<!-- TOGGLE SCRIPT -->
+<script>
+  const chatIcon = document.getElementById('chatIcon');
+  const chatModal = document.getElementById('chatModal');
+  const closeBtn = document.getElementById('closeBtn');
+
+  chatIcon.onclick = () => chatModal.style.display = 'block';
+  closeBtn.onclick = () => chatModal.style.display = 'none';
+</script>
